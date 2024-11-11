@@ -1,13 +1,40 @@
 import { Button } from './components';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Papa from 'papaparse';
 
 function App() {
   const [count, setCount] = useState(0);
+  const [dataset, setDataset] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/dataset.csv")
+      const csv = await response.text()
+
+      const result = Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          console.log(results.data)
+          setDataset(results.data)
+        }
+      })
+    }
+
+    fetchData();
+  
+  }
+  ,[])
+
+  if (dataset.length === 0) return <div>Loading...</div>
 
   return (
-    <div className='min-h-screen w-screen'>
+    <div className='min-h-screen w-screen bg-white text-black'>
+      <div className='text-4xl font-bold'>Stand Virtual Insights</div>
+      <div className='bg-black h-[2px] w-full'></div>
       <Button onClick={() => setCount(count + 1)} />
         <p>You clicked {count} times</p>
+        <div>{dataset[0].Title}</div>
     </div>
   )
 }
