@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import * as d3 from 'd3';
 import { AnimatePresence, motion } from "motion/react";
 
-function MeanPriceGraph({data, columns, city, width}) {
+function GraphOfRegions({data, columns, city,width}) {
     const svgRef = useRef();
     const toolTipRef = useRef();
     const height = 400;
@@ -97,8 +97,8 @@ function MeanPriceGraph({data, columns, city, width}) {
 
     return(
         <>
-        <div className="flex flex-col items-center">
-            <div className="flex w-[600px]">
+        <div className="flex flex-col items-center" style={{width: width}}>
+            <div className="flex">
                 <div className="ml-auto">Mean Price by {mode} for {city}</div>
                 <select onChange={(e) => setMode(e.target.value)} value={mode} className="rounded-md p-1 bg-gray-400 ml-auto">
                     {columns.map((column) => (
@@ -124,4 +124,4 @@ function MeanPriceGraph({data, columns, city, width}) {
     )
 }
 
-export default MeanPriceGraph;
+export default GraphOfRegions;

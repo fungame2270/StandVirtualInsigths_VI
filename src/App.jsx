@@ -1,6 +1,7 @@
-import { Button, MeanPriceGraph, PortugalMap } from './components';
+import { Button, GraphOfRegions, MeanPriceGraph, PortugalMap } from './components';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
+import { use } from 'motion/react-client';
 
 function App() {
   const [count, setCount] = useState(0);
@@ -8,6 +9,24 @@ function App() {
   const [dataset, setDataset] = useState([]);
   const [columns, setColums] = useState(["Brand","City","Title","Kilometer","Gas Type","Gear Box","Year", "Price", "Engine Size","Horsepower","Seller"]);
   const [city, setCity] = useState("");
+  const [dimentions, setDimensions] = useState({width:0,height:0});
+
+  useEffect(() => {
+    function handleResize() {
+      setDimensions({
+        width:window.innerWidth,
+        height:window.innerHeight
+      });
+    }
+
+      window.addEventListener('resize', handleResize);
+      handleResize();
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+  }, []);
+    
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,8 +60,11 @@ function App() {
     <div className='min-h-screen w-screen bg-white text-black'>
       <div className='text-4xl font-bold'>Stand Virtual Insights</div>
       <div className='bg-black h-[2px] w-full'></div>
-      <PortugalMap listings={originalDataset} setCity={setCity} />
-      <MeanPriceGraph data={dataset} columns={columns.filter((column) => !["Kilometer","Horsepower","Title", "Price","City"].includes(column))} city={city} />
+      <div className='flex'>
+        <PortugalMap listings={originalDataset} setCity={setCity} width={dimentions.width*0.2}/>
+        <GraphOfRegions data={dataset} columns={columns} city={city} width={dimentions.width*0.8}/>
+      </div>
+      <MeanPriceGraph data={dataset} columns={columns.filter((column) => !["Kilometer","Horsepower","Title", "Price","City"].includes(column))} city={city} width={dimentions.width*0.8} />
     </div>
   )
 }
