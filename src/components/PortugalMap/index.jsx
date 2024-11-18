@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 
-function PortugalMap({ listings }) {
+function PortugalMap({ listings, setCity }) {
     const svgRef = useRef();
 
     useEffect(() => {
@@ -94,9 +94,13 @@ function PortugalMap({ listings }) {
                         .attr('stroke-width', 0.5)
                         .style('transform', 'scale(1)')
                         .style('filter', 'none');
+                })
+                .on("click", function (event, d) {
+                    console.log(d)
+                    setCity(d.properties.NAME_1);    
                 });
         }).catch(error => console.error('Error loading data:', error));
-    }, []);
+    }, [listings]);
 
     return <svg ref={svgRef}></svg>;
 }
