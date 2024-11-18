@@ -1,4 +1,4 @@
-import { Button } from './components';
+import { PortugalMap } from './components';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
@@ -32,11 +32,9 @@ function App() {
     <div className='min-h-screen w-screen bg-white text-black'>
       <div className='text-4xl font-bold'>Stand Virtual Insights</div>
       <div className='bg-black h-[2px] w-full'></div>
-      <Button onClick={() => setCount(count + 1)} />
-        <p>You clicked {count} times</p>
-        <div>{dataset[0].Title}</div>
+      <PortugalMap listings={dataset} />
     </div>
   )
 }
 
-export default App
+export default App;
