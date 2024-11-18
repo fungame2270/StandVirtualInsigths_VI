@@ -1,10 +1,12 @@
-import { Button } from './components';
+import { Button, MeanPriceGraph } from './components';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
 function App() {
   const [count, setCount] = useState(0);
   const [dataset, setDataset] = useState([]);
+  const [columns, setColums] = useState(["Brand","City","Title","Kilometer","Gas Type","Gear Box","Year", "Price", "Engine Size","Horsepower","Seller"]);
+  const [city, setCity] = useState("Aveiro");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,9 +34,7 @@ function App() {
     <div className='min-h-screen w-screen bg-white text-black'>
       <div className='text-4xl font-bold'>Stand Virtual Insights</div>
       <div className='bg-black h-[2px] w-full'></div>
-      <Button onClick={() => setCount(count + 1)} />
-        <p>You clicked {count} times</p>
-        <div>{dataset[0].Title}</div>
+      <MeanPriceGraph data={dataset} columns={columns.filter((column) => !["Kilometer","Horsepower","Title", "Price","City"].includes(column))} city={city} />
     </div>
   )
 }
