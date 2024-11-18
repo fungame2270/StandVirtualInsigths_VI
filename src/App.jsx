@@ -1,4 +1,4 @@
-import { Button, MeanPriceGraph } from './components';
+import { Button, MeanPriceGraph, PortugalMap } from './components';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
@@ -35,8 +35,9 @@ function App() {
       <div className='text-4xl font-bold'>Stand Virtual Insights</div>
       <div className='bg-black h-[2px] w-full'></div>
       <MeanPriceGraph data={dataset} columns={columns.filter((column) => !["Kilometer","Horsepower","Title", "Price","City"].includes(column))} city={city} />
+      <PortugalMap listings={dataset} />
     </div>
   )
 }
 
-export default App
+export default App;
