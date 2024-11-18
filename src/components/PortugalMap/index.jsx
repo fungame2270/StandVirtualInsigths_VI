@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 
-function PortugalMap({ listings, setCity }) {
+function PortugalMap({ listings, setCity,width }) {
     const svgRef = useRef();
     const [filter, setFilter] = useState("listings");
     const [selectedBrand, setSelectedBrand] = useState(""); // State to track selected brand
@@ -46,7 +46,6 @@ function PortugalMap({ listings, setCity }) {
                 .domain([0, maxAvgPrice])
                 .range([d3.interpolateGreys(0), d3.interpolateGreys(1)]);
 
-            const width = 400;
             const height = 600;
 
             const projection = d3
