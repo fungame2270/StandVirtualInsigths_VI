@@ -2,19 +2,19 @@ import { useRef, useState, useEffect } from "react";
 import * as d3 from 'd3';
 import { AnimatePresence, motion } from "motion/react";
 
-function MeanPriceGraph({data, columns, city, width}) {
+function MeanPriceGraph({data, columns, city, width, mode}) {
     const svgRef = useRef();
     const toolTipRef = useRef();
     const height = 400;
-    const [mode,setMode] = useState("Seller")
+    const [column,setColumn] = useState("Seller")
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
-    const toolTipDiv = (listnings, price) => {
+    const toolTipDiv = (listings, price) => {
         return (
             <div>
                 <p>{price} €</p>
-                <p>{listnings} listnings</p>
+                <p>{listings} listings</p>
             </div>
         )
     }
@@ -27,15 +27,51 @@ function MeanPriceGraph({data, columns, city, width}) {
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
 
-        const groupedData = d3.group(data, (d) => d[mode]);
+        const groupedData = d3.group(data, (d) => d[column]);
         let aggregatedData;
         aggregatedData = Array.from(groupedData, ([key, values]) => ({
             Title: key,
             Price: d3.mean(values, (d) => d.Price),
-            listnings: d3.count(values,() => true),
+            listings: d3.count(values,() => true),
         }));
 
-        aggregatedData.sort((a, b) => b.Price - a.Price);
+
+        // Set up scales & functions to draw y
+        let yScale;
+        let yFunct;
+        let heightFunct;
+        if (mode === "listings") {
+            aggregatedData.sort((a, b) => {
+                if (a.City === city) {
+                    return -1
+                }
+                if (b.City === city) {
+                    return 1
+                }
+                return b.listings - a.listings
+            });
+            
+            
+            yScale = d3
+            .scaleLinear()
+            .domain([0, d3.max(aggregatedData, (d) => d.listings)])
+            .nice()
+            .range([innerHeight, 0]);
+            
+            yFunct = (d) => yScale(d.listings);
+            heightFunct = (d) => innerHeight - yScale(d.listings);
+        } else {
+            aggregatedData.sort((a, b) => b.Price - a.Price);
+            
+            yScale = d3
+            .scaleLinear()
+            .domain([0, d3.max(aggregatedData, (d) => d.Price)])
+            .nice()
+            .range([innerHeight, 0]);
+            
+            yFunct = (d) => yScale(d.Price);
+            heightFunct = (d) => innerHeight - yScale(d.Price);
+        }
 
         // Set up scales
         const xScale = d3
@@ -43,12 +79,6 @@ function MeanPriceGraph({data, columns, city, width}) {
         .domain(aggregatedData.map((d) => d.Title))
         .range([0, innerWidth])
         .padding(0.2);
-
-        const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(aggregatedData, (d) => d.Price)])
-        .nice()
-        .range([innerHeight, 0]);
 
         const chartGroup = svg
             .append("g")
@@ -64,7 +94,7 @@ function MeanPriceGraph({data, columns, city, width}) {
 
         chartGroup
             .append("g")
-            .call(d3.axisLeft(yScale).tickFormat(d => `${d} €`))
+            .call(d3.axisLeft(yScale).tickFormat(d => (mode === "listings" ? `${d}` : `${d} €`)))
             .selectAll("text")
             .attr("fill", "black");
 
@@ -75,19 +105,19 @@ function MeanPriceGraph({data, columns, city, width}) {
             .enter()
             .append("rect")
             .attr("x", (d) => xScale(d.Title))
-            .attr("y", (d) => yScale(d.Price))
+            .attr("y", yFunct)
             .attr("width", xScale.bandwidth())
-            .attr("height", (d) => innerHeight - yScale(d.Price))
+            .attr("height", heightFunct)
             .attr("fill", "steelblue")
             .on("mouseover",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listnings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listings,Math.round(d.Price))})
             })
             .on("mousemove",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listnings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listings,Math.round(d.Price))})
             })
             .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}));
         // Draw bars
-    }, [data, width, height,mode]);
+    }, [data, width, height,column, mode]);
 
     useEffect(() => {
         if(!toolTipRef.current) return
@@ -99,8 +129,8 @@ function MeanPriceGraph({data, columns, city, width}) {
         <>
         <div className="flex flex-col items-center">
             <div className="flex w-[600px]">
-                <div className="ml-auto">Mean Price by {mode} for {city}</div>
-                <select onChange={(e) => setMode(e.target.value)} value={mode} className="rounded-md p-1 bg-gray-400 ml-auto">
+                <div className="ml-auto">Mean Price by {column} for {city}</div>
+                <select onChange={(e) => setColumn(e.target.value)} value={column} className="rounded-md p-1 bg-gray-400 ml-auto">
                     {columns.map((column) => (
                         <option key={column} value={column}>{column}</option>
                     ))}

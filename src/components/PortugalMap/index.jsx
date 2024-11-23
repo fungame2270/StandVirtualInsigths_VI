@@ -1,14 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { feature } from 'topojson-client';
+import { motion,AnimatePresence } from "motion/react";
 
-function PortugalMap({ listings, setCity,width }) {
+function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
     const svgRef = useRef();
-    const [filter, setFilter] = useState("listings");
-    const [selectedBrand, setSelectedBrand] = useState(""); // State to track selected brand
+    const toolTipRef = useRef();
+    const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
+    const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
-    // Get a unique list of brands from the listings data
-    const brands = [...new Set(listings.map(listing => listing.Brand))];
+    const toolTipDiv = (cidade, listnings, price) => {
+        return (
+            <div>
+                <p>{cidade}</p>
+                <p>{listnings} listnings</p>
+                <p>{price} €</p>
+            </div>
+        )
+    }
 
     useEffect(() => {
         // Filter listings by the selected brand
@@ -80,88 +89,62 @@ function PortugalMap({ listings, setCity,width }) {
                     const count = listingsByDistrict.get(districtName) || 0;
                     const avgPrice = avgPriceByDistrict.get(districtName) || 0;
 
-                    if (filter === "listings"){
+                    if (mode === "listings"){
                         return colorScale(count);
                     }
-                    else if (filter === "average_price"){
+                    else if (mode === "average_price"){
                         return colorScalePrice(avgPrice);
                     }
                 })
                 .style('transition', 'all 0.3s ease')
-                .on('mouseover', function (event, d) {
+                .on("mouseover",function (e,d) {
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
                     const avgPrice = avgPriceByDistrict.get(districtName) || 0;
-
-                    tooltip.style('opacity', 1)
-                        .html(`<strong>${districtName}</strong><br>Listings: ${count}<br>Average Price: ${Math.round(avgPrice)}€`)
-                        .style('left', `${event.pageX + 10}px`)
-                        .style('top', `${event.pageY + 10}px`);
-
+                    setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(districtName,count,Math.round(avgPrice))})
                     d3.select(this)
-                        .style('transform', 'translate(0px, -2px)')
+                        .style('transform', 'translate(0px, -5px)')
                         .raise();
                 })
-                .on('mousemove', function (event) {
-                    tooltip.style('left', `${event.pageX + 10}px`)
-                        .style('top', `${event.pageY + 10}px`);
+                .on("mousemove",(e,d)=>{
+                    const districtName = d.properties.NAME_1;
+                    const count = listingsByDistrict.get(districtName) || 0;
+                    const avgPrice = avgPriceByDistrict.get(districtName) || 0;
+                    setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(districtName,count,Math.round(avgPrice))})
                 })
-                .on('mouseout', function () {
-                    tooltip.style('opacity', 0);
+                .on("mouseout",function (){
+                    setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""})
                     d3.select(this)
-                        .attr('stroke-width', 0.5)
-                        .style('transform', 'scale(1)')
-                        .style('filter', 'none');
+                        .style('transform', 'translate(0px, 0px)')
                 })
                 .on("click", function (event, d) {
                     setCity(d.properties.NAME_1);    
                 });
         }).catch(error => console.error('Error loading data:', error));
-    }, [listings, filter, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change
+    }, [listings, mode, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change
+
+    useEffect(() => {
+        if(!toolTipRef.current) return
+        setToolTipSize({width:toolTipRef.current.offsetWidth,height:toolTipRef.current.offsetHeight})
+    }, [toolTipRef.current])
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div>
             <div style={{ flex: 1 }}>
                 <svg ref={svgRef}></svg>
             </div>
-            <div style={{ width: '250px', paddingLeft: '20px' }}>
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            value="listings"
-                            checked={filter === "listings"}
-                            onChange={() => setFilter("listings")}
-                        />
-                        Listings
-                    </label>
-                    <br />
-                    <label>
-                        <input
-                            type="radio"
-                            value="average_price"
-                            checked={filter === "average_price"}
-                            onChange={() => setFilter("average_price")}
-                        />
-                        Average Price
-                    </label>
-                </div>
-
-                {/* Dropdown for selecting brand */}
-                <div style={{ marginTop: '20px' }}>
-                    <label htmlFor="brand-select">Select Brand:</label>
-                    <select
-                        id="brand-select"
-                        value={selectedBrand}
-                        onChange={(e) => setSelectedBrand(e.target.value)}
-                    >
-                        <option value="">All Brands</option>
-                        {brands.map((brand, index) => (
-                            <option key={index} value={brand}>{brand}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
+            <AnimatePresence>
+                {toolTip.visible && 
+                <motion.div className="fixed bg-gray-200 p-2 rounded-md" ref={toolTipRef}
+                    style={{top:toolTip.y - 80,left:toolTip.x - toolTipSize.width/2, pointerEvents:"none"}}
+                    entry={{opacity:1,y:-10}}
+                    animate={{y:0,opacity:1}}
+                    exit={{opacity:0,y:-10}}
+                >
+                    {toolTip.content}
+                </motion.div>
+            }
+            </AnimatePresence>
         </div>
     );
 }

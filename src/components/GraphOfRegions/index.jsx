@@ -2,11 +2,10 @@ import { useRef, useState, useEffect } from "react";
 import * as d3 from 'd3';
 import { AnimatePresence, motion } from "motion/react";
 
-function GraphOfRegions({data, columns, city,width}) {
+function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
     const svgRef = useRef();
     const toolTipRef = useRef();
-    const height = 400;
-    const [mode,setMode] = useState("Seller")
+    const height = 600;
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
@@ -20,35 +19,63 @@ function GraphOfRegions({data, columns, city,width}) {
     }
 
     useEffect(() => {
-        const margin = {top:20, right: 20, bottom: 40, left: 50};
+        const margin = {top:20, right: 20, bottom: 50, left: 50};
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
 
-        const groupedData = d3.group(data, (d) => d[mode]);
+        const groupedData = d3.group(data, (d) => d.City);
         let aggregatedData;
         aggregatedData = Array.from(groupedData, ([key, values]) => ({
-            Title: key,
+            City: key,
             Price: d3.mean(values, (d) => d.Price),
-            listnings: d3.count(values,() => true),
+            listings: d3.count(values,() => true),
         }));
 
-        aggregatedData.sort((a, b) => b.Price - a.Price);
-
-        // Set up scales
+        // Set up scales & functions to draw y
+        let yScale;
+        let yFunct;
+        let heightFunct;
+        if (mode === "listings") {
+            aggregatedData.sort((a, b) => {
+                if (a.City === city) {
+                    return -1
+                }
+                if (b.City === city) {
+                    return 1
+                }
+                return b.listings - a.listings
+            });
+            
+            
+            yScale = d3
+            .scaleLinear()
+            .domain([0, d3.max(aggregatedData, (d) => d.listings)])
+            .nice()
+            .range([innerHeight, 0]);
+            
+            yFunct = (d) => yScale(d.listings);
+            heightFunct = (d) => innerHeight - yScale(d.listings);
+        } else {
+            aggregatedData.sort((a, b) => b.Price - a.Price);
+            
+            yScale = d3
+            .scaleLinear()
+            .domain([0, d3.max(aggregatedData, (d) => d.Price)])
+            .nice()
+            .range([innerHeight, 0]);
+            
+            yFunct = (d) => yScale(d.Price);
+            heightFunct = (d) => innerHeight - yScale(d.Price);
+        }
+        
         const xScale = d3
         .scaleBand()
-        .domain(aggregatedData.map((d) => d.Title))
+        .domain(aggregatedData.map((d) => d.City))
         .range([0, innerWidth])
         .padding(0.2);
-
-        const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(aggregatedData, (d) => d.Price)])
-        .nice()
-        .range([innerHeight, 0]);
 
         const chartGroup = svg
             .append("g")
@@ -60,11 +87,25 @@ function GraphOfRegions({data, columns, city,width}) {
             .call(d3.axisBottom(xScale))
             .attr("transform", `translate(0, ${innerHeight})`)
             .selectAll("text")
-            .attr("fill", "black");
+            .attr("fill", "black")
+            .style("text-anchor", "middle") // Center align the text
+            .attr("transform", "translate(0,6)")
+            .each(function () {
+                const text = d3.select(this);
+                const words = text.text().split(" ");
+                text.text(""); // Clear the current text
+                words.forEach((word, i) => {
+                    text.append("tspan")
+                        .text(word)
+                        .attr("x", 0) // Keep text centered
+                        .attr("dy", i === 0 ? 0 : "1.2em"); // Add spacing between lines
+                });
+            });
+
 
         chartGroup
             .append("g")
-            .call(d3.axisLeft(yScale).tickFormat(d => `${d} €`))
+            .call(d3.axisLeft(yScale).tickFormat(d => (mode === "listings" ? `${d}` : `${d} €`)))
             .selectAll("text")
             .attr("fill", "black");
 
@@ -74,20 +115,24 @@ function GraphOfRegions({data, columns, city,width}) {
             .data(aggregatedData)
             .enter()
             .append("rect")
-            .attr("x", (d) => xScale(d.Title))
-            .attr("y", (d) => yScale(d.Price))
+            .attr("x", (d) => xScale(d.City))
+            .attr("y", yFunct)
             .attr("width", xScale.bandwidth())
-            .attr("height", (d) => innerHeight - yScale(d.Price))
-            .attr("fill", "steelblue")
+            .attr("height", heightFunct)
+            .attr("fill", (d) => d.City === city ? "#324ca8" : "steelblue")
             .on("mouseover",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listnings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listings,Math.round(d.Price))})
             })
             .on("mousemove",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listnings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listings,Math.round(d.Price))})
             })
-            .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}));
+            .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}))
+            .on("click", (e, d) => {
+                setCurrentCity(d.City)
+                setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""})
+            })
         // Draw bars
-    }, [data, width, height,mode]);
+    }, [data, width, height, mode, city]);
 
     useEffect(() => {
         if(!toolTipRef.current) return
@@ -99,12 +144,7 @@ function GraphOfRegions({data, columns, city,width}) {
         <>
         <div className="flex flex-col items-center" style={{width: width}}>
             <div className="flex">
-                <div className="ml-auto">Mean Price by {mode} for {city}</div>
-                <select onChange={(e) => setMode(e.target.value)} value={mode} className="rounded-md p-1 bg-gray-400 ml-auto">
-                    {columns.map((column) => (
-                        <option key={column} value={column}>{column}</option>
-                    ))}
-                </select>
+                <div className="ml-auto text-4xl">Data Across Regions</div>
             </div>
             <svg ref={svgRef} width={width} height={height} />
         </div>
