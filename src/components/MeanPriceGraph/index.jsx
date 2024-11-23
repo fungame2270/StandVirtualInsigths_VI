@@ -90,7 +90,17 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
             .call(d3.axisBottom(xScale))
             .attr("transform", `translate(0, ${innerHeight})`)
             .selectAll("text")
-            .attr("fill", "black");
+            .attr("fill", "black")
+            .on("mouseover",(e,d)=>{
+                const cityData = aggregatedData.find(item => item.Title === d);
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(cityData.listings,Math.round(cityData.Price))})
+            })
+            .on("mousemove",(e,d)=>{
+                const cityData = aggregatedData.find(item => item.Title === d);
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(cityData.listings,Math.round(cityData.Price))})
+            })
+            .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}));
+
 
         chartGroup
             .append("g")

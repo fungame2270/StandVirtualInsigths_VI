@@ -21,17 +21,21 @@ function ModalListings({listings, selectedcity, selectedbrand,setSelectedcity}) 
                                 return(
                                     <div className="border border-gray-300 p-4 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
                                         <div className="space-y-2">
-                                            <h2 className="text-lg font-semibold">{listing.Title} • {listing.Price} €</h2>
-                                            <p className="text-sm text-gray-500">{listing.EngineSize} cm³ • {listing.Horsepower} Hp</p>
+                                            <h2 className="text-lg font-semibold">
+                                                {listing.Title} • {listing.Price} €
+                                            </h2>
+                                            <p className="text-sm text-gray-500">
+                                                {listing.EngineSize !== "N/A" && `${listing.EngineSize} cm³ •`} {listing.Horsepower} Hp
+                                            </p>
                                             <div className="flex items-center space-x-4 text-sm text-gray-500">
-                                            <p>{listing.Kilometer} km</p>
-                                            <p>{listing.GasType}</p>
-                                            <p>{listing.GearBox}</p>
-                                            <p>{listing.Year}</p>
+                                                <p>{listing.Kilometer} km</p>
+                                                <p>{listing.GasType}</p>
+                                                <p>{listing.GearBox}</p>
+                                                <p>{listing.Year}</p>
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                            <p>{listing.Location}</p>
-                                            <p>{listing.Published}</p>
+                                                <p>{listing.Location}</p>
+                                                <p>{listing.Published}</p>
                                             </div>
                                             <p>{listing.Seller}</p>
                                         </div>

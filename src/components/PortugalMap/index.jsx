@@ -9,11 +9,11 @@ function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
-    const toolTipDiv = (cidade, listnings, price) => {
+    const toolTipDiv = (cidade, listings, price) => {
         return (
             <div>
                 <p>{cidade}</p>
-                <p>{listnings} listnings</p>
+                <p>{listings} listings</p>
                 <p>{price} €</p>
             </div>
         )
@@ -98,9 +98,16 @@ function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
                 })
                 .style('transition', 'all 0.3s ease')
                 .on("mouseover",function (e,d) {
+                    
+                    console.log(d.listings)
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
                     const avgPrice = avgPriceByDistrict.get(districtName) || 0;
+
+                    if (count == 0){
+                        return
+                    }
+
                     setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(districtName,count,Math.round(avgPrice))})
                     d3.select(this)
                         .style('transform', 'translate(0px, -5px)')
@@ -110,6 +117,11 @@ function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
                     const avgPrice = avgPriceByDistrict.get(districtName) || 0;
+
+                    if (count == 0){
+                        return
+                    }
+
                     setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(districtName,count,Math.round(avgPrice))})
                 })
                 .on("mouseout",function (){

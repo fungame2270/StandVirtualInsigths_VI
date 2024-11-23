@@ -9,11 +9,11 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
-    const toolTipDiv = (listnings, price) => {
+    const toolTipDiv = (listings, price) => {
         return (
             <div>
                 <p>{price} €</p>
-                <p>{listnings} listnings</p>
+                <p>{listings} listings</p>
             </div>
         )
     }
@@ -59,8 +59,15 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
             yFunct = (d) => yScale(d.listings);
             heightFunct = (d) => innerHeight - yScale(d.listings);
         } else {
-            aggregatedData.sort((a, b) => b.Price - a.Price);
-            
+            aggregatedData.sort((a, b) => {
+                if (a.City === city) {
+                    return -1
+                }
+                if (b.City === city) {
+                    return 1
+                }
+                return b.Price - a.Price
+            });            
             yScale = d3
             .scaleLinear()
             .domain([0, d3.max(aggregatedData, (d) => d.Price)])
@@ -90,6 +97,15 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
             .attr("fill", "black")
             .style("text-anchor", "middle") // Center align the text
             .attr("transform", "translate(0,6)")
+            .on("mouseover",(e,d)=>{
+                const cityData = aggregatedData.find(item => item.City === d);
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(cityData.listings,Math.round(cityData.Price))})
+            })
+            .on("mousemove",(e,d)=>{
+                const cityData = aggregatedData.find(item => item.City === d);
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(cityData.listings,Math.round(cityData.Price))})
+            })
+            .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}))
             .each(function () {
                 const text = d3.select(this);
                 const words = text.text().split(" ");
