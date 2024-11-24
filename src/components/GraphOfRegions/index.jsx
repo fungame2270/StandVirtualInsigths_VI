@@ -135,7 +135,7 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
             .attr("y", yFunct)
             .attr("width", xScale.bandwidth())
             .attr("height", heightFunct)
-            .attr("fill", (d) => d.City === city ? "#324ca8" : "steelblue")
+            .attr("fill", (d) => d.City === city ? "orange" : "steelblue")
             .on("mouseover",(e,d)=>{
                 setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listings,Math.round(d.Price))})
             })
