@@ -50,13 +50,13 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
             const colorScale = d3.scalePow()
               .exponent(exponent)
               .domain([0, maxListings])
-              .range([d3.interpolateBlues(0), d3.interpolateBlues(1)]);
+              .range(["white", d3.interpolateBlues(1)]);
 
             const exponentPrice = 2; // Adjust exponent for a non-linear response (0.5 is a square root)
             const colorScalePrice = d3.scalePow()
                 .exponent(exponentPrice)
                 .domain([0, maxAvgPrice])
-                .range([d3.interpolateBlues(0), d3.interpolateBlues(1)]);
+                .range(["white", d3.interpolateBlues(1)]);
 
             const height = 600;
 
@@ -104,7 +104,6 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                 .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 3 : 0.5)
                 .on("mouseover",function (e,d) {
                     
-                    console.log(d.listings)
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
                     const avgPrice = avgPriceByDistrict.get(districtName) || 0;
