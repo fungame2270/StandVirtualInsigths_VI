@@ -100,6 +100,8 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                     }
                 })
                 .style('transition', 'all 0.3s ease')
+                .attr('stroke', (d) => (city === d.properties.NAME_1) ? 'orange' : 'black')
+                .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 3 : 0.5)
                 .on("mouseover",function (e,d) {
                     
                     console.log(d.listings)
