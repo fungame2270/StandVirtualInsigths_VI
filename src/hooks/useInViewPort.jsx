@@ -6,9 +6,9 @@ function useIsInViewport(ref) {
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
-                setIsInViewport(entry.isIntersecting); // Checks if the element is visible in the viewport
+                setIsInViewport(entry.isIntersecting);
             },
-            { threshold: 0 } // 0 means even a pixel of visibility counts
+            { threshold: 0.5 }
         );
 
         if (ref.current) {
