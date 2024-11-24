@@ -7,8 +7,6 @@ function Filters({ setBrand, brand, mode, setMode, listings }) {
     const filterRef = useRef();
     const isInView = useIsInViewport(filterRef);
 
-    console.log(isInView)
-
     return (
         <div className="w-full flex items-center justify-center">
         <AnimatePresence>
