@@ -140,7 +140,8 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                         return
                     }
                     
-                    setCity(d.properties.NAME_1);    
+                    setCity(d.properties.NAME_1);
+                    d3.select(this).raise();   
                 });
         }).catch(error => console.error('Error loading data:', error));
     }, [listings, mode, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change
