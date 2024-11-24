@@ -1,4 +1,4 @@
-import { GraphOfRegions, MeanPriceGraph, PortugalMap,Filters, ModalListings } from './components';
+import { GraphOfRegions, MeanPriceGraph, PortugalMap,Filters, ModalListings, GraphLine } from './components';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
@@ -65,14 +65,13 @@ function App() {
       <ModalListings listings={originalDataset} selectedcity={currentCity} selectedbrand={brand} setSelectedcity={setCurrentCity}/>
       <div className='text-4xl font-bold pt-2' style={{paddingLeft:padding/2}}>Stand Virtual Insights</div>
       <div className='bg-black h-[2px] w-full'></div>
-      <div className='flex' style={{paddingLeft:padding/2}}>
-        <div className='flex flex-col'>
-          <Filters setBrand={setBrand} brand={brand} mode={mode} setMode={setMode} listings={originalDataset}/>
-          <PortugalMap listings={originalDataset} setCity={setCity} width={dimentions.width*0.2} setMode={setMode} mode={mode} selectedBrand={brand}/>
-        </div>
+      <Filters setBrand={setBrand} brand={brand} mode={mode} setMode={setMode} listings={originalDataset}/>
+      <div className='flex gap-4 mt-2 mb-4' style={{paddingLeft:padding/2}}>
+        <PortugalMap listings={originalDataset} city={city} setCity={setCity} width={dimentions.width*0.2} setMode={setMode} mode={mode} selectedBrand={brand}/>
         <GraphOfRegions data={originalDataset.filter((d) => brand === "" || d.Brand === brand)} columns={columns} city={city} width={dimentions.width*0.8} mode={mode} setCurrentCity={setCurrentCity}/>
       </div>
-      <MeanPriceGraph data={dataset.filter((d) => brand === "" || d.Brand === brand)} columns={columns.filter((column) => !["Kilometer","Horsepower","Title", "Price","City"].includes(column))} city={city} width={dimentions.width*0.8} mode={mode}/>
+      <MeanPriceGraph data={dataset.filter((d) => brand === "" || d.Brand === brand)} columns={columns.filter((column) => ["Brands","GearBox","GasType","Seller"].includes(column))} city={city} width={dimentions.width} mode={mode}/>
+      <GraphLine data={dataset.filter((d) => brand === "" || d.Brand === brand)} columns={columns.filter((column) => ["Kilometer","Horsepower","EngineSize","Year"].includes(column))} city={city} width={dimentions.width} mode={mode}/>
     </div>
   )
 }

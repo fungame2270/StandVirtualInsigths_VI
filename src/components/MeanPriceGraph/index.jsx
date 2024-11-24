@@ -10,9 +10,10 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
-    const toolTipDiv = (listings, price) => {
+    const toolTipDiv = (listings, price,Title) => {
         return (
             <div>
+                <p>{Title}</p>
                 <p>{price} €</p>
                 <p>{listings} listings</p>
             </div>
@@ -120,10 +121,10 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
             .attr("height", heightFunct)
             .attr("fill", "steelblue")
             .on("mouseover",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(d.listings,Math.round(d.Price),d.Title)})
             })
             .on("mousemove",(e,d)=>{
-                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listings,Math.round(d.Price))})
+                setToolTip({visible: true,x:e.clientX,y:e.clientY,content: toolTipDiv(d.listings,Math.round(d.Price),d.Title)})
             })
             .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}));
         // Draw bars

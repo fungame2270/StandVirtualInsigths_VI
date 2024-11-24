@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { feature } from 'topojson-client';
 import { motion,AnimatePresence } from "motion/react";
 
-function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
+function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
     const svgRef = useRef();
     const toolTipRef = useRef();
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
@@ -134,6 +134,20 @@ function PortugalMap({ listings, setCity,width, mode, selectedBrand }) {
                 });
         }).catch(error => console.error('Error loading data:', error));
     }, [listings, mode, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change
+
+    useEffect(() => {
+        const svg = d3.select(svgRef.current)
+        svg.selectAll('path').attr('stroke', (d) => (city === d.properties.NAME_1) ? '#324ca8' : 'black')
+                            .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 5 : 0.5)
+            .on("click", function (event, d) {
+                if (city === d.properties.NAME_1){
+                    setCity("");
+                    return
+                }
+                setCity(d.properties.NAME_1);    
+            });
+        
+    }, [svgRef.current,city]);
 
     useEffect(() => {
         if(!toolTipRef.current) return

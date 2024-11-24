@@ -10,6 +10,49 @@ function GraphLine({ data, columns, city, width, mode }) {
     const [toolTip, setToolTip] = useState({ visible: false, x: 0, y: 0, content: "" });
     const [toolTipSize, setToolTipSize] = useState({ width: 0, height: 0 });
 
+    const dataProcessor = (data,column) => {
+        if (column === "EngineSize") {
+            const round = (value) => {
+                return Math.round(value / 100) *100;
+            };
+            
+            let retdata = data.filter((d) => d.EngineSize !== "N/A").map((d) => {
+                return {
+                    ...d,
+                    EngineSize: round(d[column]),
+                };
+            });
+            return retdata;
+        }
+        if (column === "Horsepower") {
+            const round = (value) => {
+                return Math.round(value / 10) * 10;
+            };
+            
+            let retdata = data.filter((d) => (d.Horsepower !== "N/A" && !isNaN(d.Horsepower))).map((d) => {
+                return {
+                    ...d,
+                    Horsepower: round(d[column]),
+                };
+            });
+            return retdata;
+        }
+        if (column === "Kilometer") {
+            const round = (value) => {
+                return Math.round(value / 10000) * 10000;
+            };  
+    
+            let retdata = data.map((d) => {
+                return {
+                    ...d,
+                    Kilometer: round(d.Kilometer),
+                };
+            });
+            return retdata;
+        }
+        return data;
+    }
+
     const toolTipDiv = (listings, price, Title) => {
         return (
             <div>
@@ -28,7 +71,10 @@ function GraphLine({ data, columns, city, width, mode }) {
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
 
-        const groupedData = d3.group(data, (d) => d[column]);
+        const dataToUse = dataProcessor(data, column);
+
+        const groupedData = d3.group(dataToUse, (d) => d[column]);
+
         const aggregatedData = Array.from(groupedData, ([key, values]) => ({
             Title: key,
             Price: d3.mean(values, (d) => d.Price),
@@ -59,7 +105,7 @@ function GraphLine({ data, columns, city, width, mode }) {
         // Add axes
         const xTickValues = aggregatedData
             .map((d) => d.Title)
-            .filter((_, i) => i % Math.ceil(aggregatedData.length / 10) === 0); // Adjust the divisor (10) to control density
+            .filter((d, i) => i % 2 === 0); // Adjust the divisor (10) to control density
 
         chartGroup
             .append("g")
