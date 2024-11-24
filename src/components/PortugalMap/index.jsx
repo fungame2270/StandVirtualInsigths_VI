@@ -6,6 +6,7 @@ import { motion,AnimatePresence } from "motion/react";
 function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
     const svgRef = useRef();
     const toolTipRef = useRef();
+    const [listingsByDistrict, setListingsByDistrict] = useState([])
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
@@ -34,6 +35,8 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                 d => d.City
             );
 
+            setListingsByDistrict(listingsByDistrict)
+
             const avgPriceByDistrict = d3.rollup(
                 filteredListings,
                 v => d3.mean(v, d => d.Price),
@@ -47,13 +50,13 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
             const colorScale = d3.scalePow()
               .exponent(exponent)
               .domain([0, maxListings])
-              .range([d3.interpolateGreys(0), d3.interpolateGreys(1)]);
+              .range([d3.interpolateBlues(0), d3.interpolateBlues(1)]);
 
             const exponentPrice = 2; // Adjust exponent for a non-linear response (0.5 is a square root)
             const colorScalePrice = d3.scalePow()
                 .exponent(exponentPrice)
                 .domain([0, maxAvgPrice])
-                .range([d3.interpolateGreys(0), d3.interpolateGreys(1)]);
+                .range([d3.interpolateBlues(0), d3.interpolateBlues(1)]);
 
             const height = 600;
 
@@ -110,8 +113,7 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
 
                     setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(districtName,count,Math.round(avgPrice))})
                     d3.select(this)
-                        .style('transform', 'translate(0px, -5px)')
-                        .raise();
+                        .style('transform', 'translate(0px, -5px)');
                 })
                 .on("mousemove",(e,d)=>{
                     const districtName = d.properties.NAME_1;
@@ -130,16 +132,34 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                         .style('transform', 'translate(0px, 0px)')
                 })
                 .on("click", function (event, d) {
-                    setCity(d.properties.NAME_1);    
+
+                    const districtName = d.properties.NAME_1;
+                    const count = listingsByDistrict.get(districtName) || 0;
+                    
+                    if (count == 0){
+                        return
+                    }
+                    
+                    setCity(d.properties.NAME_1);
+                    d3.select(this).raise();   
                 });
         }).catch(error => console.error('Error loading data:', error));
     }, [listings, mode, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change
 
     useEffect(() => {
         const svg = d3.select(svgRef.current)
-        svg.selectAll('path').attr('stroke', (d) => (city === d.properties.NAME_1) ? '#324ca8' : 'black')
-                            .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 5 : 0.5)
+        svg.selectAll('path').attr('stroke', (d) => (city === d.properties.NAME_1) ? 'orange' : 'black')
+                            .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 3 : 0.5)
             .on("click", function (event, d) {
+                
+                const districtName = d.properties.NAME_1;
+                const count = listingsByDistrict.get(districtName) || 0;
+                
+                if (count == 0){
+                    return
+                }
+
+                d3.select(this).raise();
                 if (city === d.properties.NAME_1){
                     setCity("");
                     return
