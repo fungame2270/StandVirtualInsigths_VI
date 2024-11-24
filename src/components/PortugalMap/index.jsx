@@ -6,6 +6,7 @@ import { motion,AnimatePresence } from "motion/react";
 function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
     const svgRef = useRef();
     const toolTipRef = useRef();
+    const [listingsByDistrict, setListingsByDistrict] = useState([])
     const [toolTip,setToolTip] = useState({visible: false,x:0,y:0,content:""});
     const [toolTipSize,setToolTipSize] = useState({width:0,height:0});
 
@@ -33,6 +34,8 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                 v => v.length,
                 d => d.City
             );
+
+            setListingsByDistrict(listingsByDistrict)
 
             const avgPriceByDistrict = d3.rollup(
                 filteredListings,
@@ -132,7 +135,7 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
 
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
-
+                    
                     if (count == 0){
                         return
                     }
@@ -147,6 +150,14 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
         svg.selectAll('path').attr('stroke', (d) => (city === d.properties.NAME_1) ? 'orange' : 'black')
                             .attr('stroke-width', (d) => (city === d.properties.NAME_1) ? 3 : 0.5)
             .on("click", function (event, d) {
+                
+                const districtName = d.properties.NAME_1;
+                const count = listingsByDistrict.get(districtName) || 0;
+                
+                if (count == 0){
+                    return
+                }
+
                 d3.select(this).raise();
                 if (city === d.properties.NAME_1){
                     setCity("");
