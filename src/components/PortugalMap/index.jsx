@@ -134,16 +134,20 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                         .style('transform', 'translate(0px, 0px)')
                 })
                 .on("click", function (event, d) {
-
+                
                     const districtName = d.properties.NAME_1;
                     const count = listingsByDistrict.get(districtName) || 0;
                     
                     if (count == 0){
                         return
                     }
-                    
-                    setCity(d.properties.NAME_1);
-                    d3.select(this).raise();   
+    
+                    d3.select(this).raise();
+                    if (city === d.properties.NAME_1){
+                        setCity("");
+                        return
+                    }
+                    setCity(d.properties.NAME_1);    
                 });
         }).catch(error => console.error('Error loading data:', error));
     }, [listings, mode, selectedBrand]);  // Re-run the effect when listings, filter, or selectedBrand change

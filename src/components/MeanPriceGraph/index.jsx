@@ -105,7 +105,8 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
 
         chartGroup
             .append("g")
-            .call(d3.axisLeft(yScale).tickFormat(d => (mode === "listings" ? `${d}` : `${d} €`)))
+            .call(d3.axisLeft(yScale).tickValues(yScale.ticks().filter((d) => Number.isInteger(d)))
+            .tickFormat((d) => (mode === "listings" ? `${d}` : `${d} €`)))
             .selectAll("text")
             .attr("fill", "black");
 
@@ -139,9 +140,9 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
     return(
         <>
         <div className="flex flex-col items-center">
-            <div className="flex w-[600px]">
-                <div className="ml-auto">Mean Price by {column} for {city}</div>
-                <select onChange={(e) => setColumn(e.target.value)} value={column} className="rounded-md p-1 bg-gray-400 ml-auto">
+            <div className="flex gap-2 justify-between" style={{ width: width }}>
+                <div className="text-3xl">{mode === "listings" ? "Listings" : "Average Price"} by {column} for {city}</div>
+                <select onChange={(e) => setColumn(e.target.value)} value={column} className="rounded-md p-1 border-2 border-gray-400 bg-white">
                     {columns.map((column) => (
                         <option key={column} value={column}>{column}</option>
                     ))}
