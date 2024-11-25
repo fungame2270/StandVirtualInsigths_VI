@@ -21,7 +21,7 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
     }
 
     useEffect(() => {
-        const margin = {top:20, right: 20, bottom: 40, left: 50};
+        const margin = {top:20, right: 20, bottom: 40, left: 80};
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
@@ -109,6 +109,25 @@ function MeanPriceGraph({data, columns, city, width, mode}) {
             .tickFormat((d) => (mode === "listings" ? `${d}` : `${d} €`)))
             .selectAll("text")
             .attr("fill", "black");
+
+        // Draw axis labels
+        //Labels
+        chartGroup
+            .append("text")
+            .attr("x", innerWidth / 2) // Center the label horizontally
+            .attr("y", innerHeight + 33) // Position below the axis
+            .attr("text-anchor", "middle") // Center align the text
+            .attr("fill", "black") // Text color
+            .text(column); // The label text
+        
+        chartGroup
+            .append("text")
+            .attr("x", - innerHeight / 2) // Center the label horizontally
+            .attr("y", mode === "listings" ? -50 : -60) // Position below the axis
+            .attr("text-anchor", "middle") // Center align the text
+            .attr("transform", "rotate(-90)")
+            .attr("fill", "black") // Text color
+            .text(mode === "listings" ? "Listings" : "Average Price"); // The label text
 
         // Draw bars
         chartGroup

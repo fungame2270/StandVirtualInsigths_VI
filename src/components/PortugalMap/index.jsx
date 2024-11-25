@@ -71,16 +71,6 @@ function PortugalMap({ listings, city, setCity,width, mode, selectedBrand }) {
                 .attr('width', width)
                 .attr('height', height);
 
-            const tooltip = d3.select('body').append('div')
-                .attr('class', 'tooltip')
-                .style('position', 'absolute')
-                .style('padding', '8px')
-                .style('background', 'rgba(0, 0, 0, 0.7)')
-                .style('color', '#fff')
-                .style('border-radius', '4px')
-                .style('pointer-events', 'none')
-                .style('opacity', 0);
-
             svg.selectAll('path')
                 .data(geojson.features)
                 .join('path')

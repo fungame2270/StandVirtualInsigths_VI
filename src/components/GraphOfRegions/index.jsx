@@ -19,7 +19,7 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
     }
 
     useEffect(() => {
-        const margin = {top:20, right: 20, bottom: 50, left: 50};
+        const margin = {top:20, right: 20, bottom: 75, left: 80};
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
@@ -124,6 +124,25 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
             .call(d3.axisLeft(yScale).tickFormat(d => (mode === "listings" ? `${d}` : `${d} €`)))
             .selectAll("text")
             .attr("fill", "black");
+
+        // add labels
+        //Labels
+        chartGroup
+            .append("text")
+            .attr("x", innerWidth / 2) // Center the label horizontally
+            .attr("y", innerHeight + 53) // Position below the axis
+            .attr("text-anchor", "middle") // Center align the text
+            .attr("fill", "black") // Text color
+            .text("Districts"); // The label text
+        
+        chartGroup
+            .append("text")
+            .attr("x", - innerHeight / 2) // Center the label horizontally
+            .attr("y", mode === "listings" ? -40 : -60) // Position below the axis
+            .attr("text-anchor", "middle") // Center align the text
+            .attr("transform", "rotate(-90)")
+            .attr("fill", "black") // Text color
+            .text(mode === "listings" ? "Listings" : "Average Price"); // The label text
 
         // Draw bars
         chartGroup
