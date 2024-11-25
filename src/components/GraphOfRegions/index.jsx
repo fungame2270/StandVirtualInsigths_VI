@@ -106,6 +106,10 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
                 setToolTip({visible: true,x:e.clientX,y:e.clientY,content:toolTipDiv(cityData.listings,Math.round(cityData.Price))})
             })
             .on("mouseout",()=>setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""}))
+            .on("click", (e, d) => {
+                setCurrentCity(d)
+                setToolTip({visible: false,x:toolTip.x, y:toolTip.y,content:""})
+            })
             .each(function () {
                 const text = d3.select(this);
                 const words = text.text().split(" ");
