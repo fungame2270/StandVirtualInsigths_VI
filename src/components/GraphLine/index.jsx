@@ -171,7 +171,7 @@ function GraphLine({ data, columns, city, width, mode }) {
         <>
             <div className="flex flex-col items-center">
                 <div className="flex gap-2 justify-between" style={{ width: width }}>
-                <div className="text-3xl">{mode === "listings" ? "Listings" : "Average Price"} by {column} for {city}</div>
+                <div className="text-3xl">{mode === "listings" ? "Listings" : "Average Price"} by {column} for {city || "Portugal"}</div>
                     <select
                         onChange={(e) => setColumn(e.target.value)}
                         value={column}

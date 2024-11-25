@@ -160,7 +160,9 @@ function GraphOfRegions({data, columns, city,width, mode, setCurrentCity}) {
         <>
         <div className="flex flex-col items-center" style={{width: width}}>
             <div className="flex">
-                <div className="ml-auto text-4xl">Data Across Regions</div>
+                <div className="ml-auto text-4xl">
+                    {mode === "listings" ? "Listings" : mode === "average_price" ? "Average Price" : mode} per District
+                </div>
             </div>
             <svg ref={svgRef} width={width} height={height} />
         </div>
